@@ -1,0 +1,45 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "ebook_app_scratch",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "ebook_app_scratch (profile mode)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "ebook_app_scratch (release mode)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "epub_reader_make_pages",
+            "cwd": "packages\\epub_reader_make_pages",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "epub_reader_make_pages (profile mode)",
+            "cwd": "packages\\epub_reader_make_pages",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "epub_reader_make_pages (release mode)",
+            "cwd": "packages\\epub_reader_make_pages",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        }
+    ]
+}

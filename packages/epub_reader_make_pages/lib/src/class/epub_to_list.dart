@@ -8,21 +8,23 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 class GetListFromEpub {
-  GetListFromEpub({required this.name,});
+  GetListFromEpub({required this.name, required this.folder});
 
   final String name;
+  final String folder;
   
   Future <Tuple2<List<String>, List<BookTitle>>>   parseEpubWithChapters() async {
-    var dir = await getApplicationDocumentsDirectory();
+    var dir = (await getApplicationDocumentsDirectory()).path;
     String filename = name;
+    String filefolder = folder;
     
-    io.File file = io.File('${dir.path}/$filename');
+    io.File file = io.File('$dir/$filefolder/$filename');
     List<int> bytes = await file.readAsBytes();
 
 
     // Opens a book and reads all of its content into memory
     EpubBook epubBook = await EpubReader.readBook(bytes);
-    bool imgSaver = await saveImages(epubBook);
+    bool imgSaver = await saveImages(epubBook, filefolder);
     if(imgSaver == true)
     {
       // Enumerating chapters
@@ -52,7 +54,7 @@ class GetListFromEpub {
           String imageUrlWithoutPrefix = imageUrl.replaceAll('images/', '');
           
           // Load image file and convert to base64
-          List<int> imageBytes = await io.File('${dir.path}/$imageUrlWithoutPrefix').readAsBytes();
+          List<int> imageBytes = await io.File('$dir/$filefolder/$imageUrlWithoutPrefix').readAsBytes();
           String base64Image = base64Encode(imageBytes);
 
           // Replace image URL with base64 encoded data in HTML content
@@ -97,8 +99,8 @@ class GetListFromEpub {
 
   }  
   
-  Future<bool> saveImages(EpubBook epubBook) async {
-    var dir = await getApplicationDocumentsDirectory();
+  Future<bool> saveImages(EpubBook epubBook, String fileFolder) async {
+    var dir = (await getApplicationDocumentsDirectory()).path;
     EpubContent? bookContent = epubBook.Content;
 
     try{
@@ -115,7 +117,7 @@ class GetListFromEpub {
               Uint8List bytes = Uint8List.fromList(imageData.Content!);
 
               // Create a file in the current directory
-              String filePath = '${dir.path}/$imageNameWithoutPrefix';
+              String filePath = '$dir/$fileFolder/$imageNameWithoutPrefix';
               io.File imageFile = io.File(filePath);
 
               // Write image data to the file

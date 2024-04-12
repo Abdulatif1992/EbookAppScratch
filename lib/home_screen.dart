@@ -703,11 +703,12 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void>unzipEpub(int bookid) async{
     String dir = (await getApplicationDocumentsDirectory()).path;
 
-    String bookUrl = "$dir/$bookid.zip";
+    String bookUrl = "$dir/$bookid/$bookid.zip";
     if(await File(bookUrl).exists()==true)
-    {      
+    {
+      
       // Read the Zip file from disk.
-      var bytes = File("$dir/$bookid.zip").readAsBytesSync();
+      var bytes = File(bookUrl).readAsBytesSync();
 
       // Decode the Zip file
       final archive = ZipDecoder().decodeBytes(
@@ -723,7 +724,7 @@ class _HomeScreenState extends State<HomeScreen> {
         String fullName = file.name;
         extention = fullName.substring(fullName.indexOf('.'));
 
-        var fileName = '$dir/$bookid$extention';
+        var fileName = '$dir/$bookid/$bookid$extention';
         pdfUrl = fileName;
         if (file.isFile) {
           var outFile = File(fileName);
@@ -736,7 +737,7 @@ class _HomeScreenState extends State<HomeScreen> {
       if(extention=='.epub')
       {
         BuildContext currentContext = context;
-        GetListFromEpub getList = GetListFromEpub(name:'$bookid$extention');
+        GetListFromEpub getList = GetListFromEpub(name:'$bookid$extention', folder: '$bookid');
         var htmlAndTitle = await getList.parseEpubWithChapters(); 
         List<String> htmlList =    htmlAndTitle.item1;          
         String fullHtml = htmlList.last;

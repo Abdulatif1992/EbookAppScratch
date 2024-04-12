@@ -182,7 +182,7 @@ class _DetailScreenState extends State<DetailScreen> {
       });  
     
     String filePath = await downloadFile(
-        '${siteUrl}download/$bookId', '$bookId.zip');
+        '${siteUrl}download/$bookId', '$bookId','$bookId.zip');
 
     if(filePath=='Unauthenticated')
     {
@@ -221,7 +221,7 @@ class _DetailScreenState extends State<DetailScreen> {
     }
   }
 
-  Future<String> downloadFile(String url, String filename) async {   
+  Future<String> downloadFile(String url, String foulder, String filename) async {   
     final token = box.read('token');
 
     var request = await http.get(
@@ -233,9 +233,12 @@ class _DetailScreenState extends State<DetailScreen> {
       );
     if(request.statusCode==200)
     {
+      // create unique foulder
+      var dir = (await getApplicationDocumentsDirectory()).path;
+      await createFolder(dir, foulder);
+
       var bytes = request.bodyBytes;
-      var dir = await getApplicationDocumentsDirectory();
-      File file = File('${dir.path}/$filename');
+      File file = File('$dir/$foulder/$filename');
       await file.writeAsBytes(bytes);
       return file.path;
     }
@@ -250,7 +253,7 @@ class _DetailScreenState extends State<DetailScreen> {
   Future<void> updateDb(int bookId) async{
     String dir = (await getApplicationDocumentsDirectory()).path;
 
-    String bookUrl = "$dir/$bookId.zip";
+    String bookUrl = "$dir/$bookId/$bookId.zip";
     if(await File(bookUrl).exists()==true)
     {
       int timestamp = DateTime.now().millisecondsSinceEpoch;
@@ -263,7 +266,7 @@ class _DetailScreenState extends State<DetailScreen> {
   Future<void> _checkDownload(int bookId) async{
     String dir = (await getApplicationDocumentsDirectory()).path;
 
-    String bookUrl = "$dir/$bookId.zip";
+    String bookUrl = "$dir/$bookId/$bookId.zip";
 
     if(widget.book.upd==1){
       isDownloadFinish = true;
@@ -285,12 +288,12 @@ class _DetailScreenState extends State<DetailScreen> {
   Future<void>unzipEpub(int bookid) async{
     String dir = (await getApplicationDocumentsDirectory()).path;
 
-    String bookUrl = "$dir/$bookid.zip";
+    String bookUrl = "$dir/$bookid/$bookid.zip";
     if(await File(bookUrl).exists()==true)
     {
       
       // Read the Zip file from disk.
-      var bytes = File("$dir/$bookid.zip").readAsBytesSync();
+      var bytes = File(bookUrl).readAsBytesSync();
 
       // Decode the Zip file
       final archive = ZipDecoder().decodeBytes(
@@ -306,7 +309,7 @@ class _DetailScreenState extends State<DetailScreen> {
         String fullName = file.name;
         extention = fullName.substring(fullName.indexOf('.'));
 
-        var fileName = '$dir/$bookid$extention';
+        var fileName = '$dir/$bookid/$bookid$extention';
         pdfUrl = fileName;
         if (file.isFile) {
           var outFile = File(fileName);
@@ -319,7 +322,7 @@ class _DetailScreenState extends State<DetailScreen> {
       if(extention=='.epub')
       {
         BuildContext currentContext = context;
-        GetListFromEpub getList = GetListFromEpub(name:'$bookid$extention');
+        GetListFromEpub getList = GetListFromEpub(name:'$bookid$extention', folder: '$bookid');
         var htmlAndTitle = await getList.parseEpubWithChapters(); 
         List<String> htmlList =    htmlAndTitle.item1;          
         String fullHtml = htmlList.last;
@@ -364,5 +367,18 @@ class _DetailScreenState extends State<DetailScreen> {
     }
   }
 
+  Future<void> createFolder(String path, String folderName) async {
+  // Create a Directory instance at the specified path
+  Directory newFolder = Directory('$path/$folderName');
+
+  // Check if the folder already exists
+  if (await newFolder.exists()) {
+    //print('Folder already exists');
+  } else {
+    // Create the folder
+    await newFolder.create();
+    //print('Folder created at $path/$folderName');
+  }
+}
 }
 

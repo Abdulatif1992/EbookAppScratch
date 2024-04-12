@@ -56,6 +56,7 @@ class _HomeScreenState extends State<HomeScreen> {
   var _foundBook = List<BookFromSql>.empty();
 
   bool isloading = true;
+  int isOpeningBook = 0;
 
   @override
   void initState(){
@@ -94,7 +95,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         onTap: () async{
                           await unzipEpub(book.bookid); 
                         },
-                        child: _myBooks(book.bookid, book.base64),
+                        child:_myBooks(book.bookid, book.base64),
                       )).toList(),
                     ),
                   ),
@@ -259,6 +260,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _myBooks(int bookId, String base64){
     try{
+      if(isOpeningBook==bookId) return _myOpeningBook(bookId, base64);
       return Container(
         margin: const EdgeInsets.all(5),
         height: 200,
@@ -288,6 +290,33 @@ class _HomeScreenState extends State<HomeScreen> {
         )
       );
     }
+  }
+
+  Widget _myOpeningBook(int bookId, String base64){    
+    return Container(
+      margin: const EdgeInsets.all(5),
+      height: 200,
+      width: 160,
+      child: Stack(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8.0),
+            child: ColorFiltered(
+                colorFilter: ColorFilter.mode(
+                Colors.white.withOpacity(0.3), // Adjust opacity to control brightness
+                BlendMode.modulate, // Blend mode to adjust brightness
+              ),
+              child: Image.memory(
+                  base64Decode("$base64"),
+                  height: 200.0,
+                  width: 160.0,   
+              ),
+            ),
+          ),
+          const Center(child: const CircularProgressIndicator()),
+        ],  
+      )
+    );
   }
 
   Widget _categoriesTitle(){
@@ -701,6 +730,10 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void>unzipEpub(int bookid) async{
+    setState(() {
+      isOpeningBook = bookid;
+    });
+
     String dir = (await getApplicationDocumentsDirectory()).path;
 
     String bookUrl = "$dir/$bookid/$bookid.zip";
@@ -776,6 +809,10 @@ class _HomeScreenState extends State<HomeScreen> {
           MaterialPageRoute(builder: (context) => PdfReaderScreen(bookId: bookid, pdfUrl: pdfUrl)),          
         );
       }
+
+      setState(() {
+        isOpeningBook = 0;
+      });
     }
     else{
       //print("zip file is not exist");

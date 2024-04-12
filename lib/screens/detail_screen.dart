@@ -43,6 +43,8 @@ class _DetailScreenState extends State<DetailScreen> {
   bool isDownloadStarted = false;
   bool isDownloadFinish = false;
 
+  bool isOpening = false;
+
   final box = GetStorage();  
 
   @override
@@ -92,7 +94,10 @@ class _DetailScreenState extends State<DetailScreen> {
                         ),
                         Visibility(
                           visible: isDownloadFinish,
-                          child: ElevatedButton(onPressed: () async{
+                          child: 
+                          isOpening
+                          ? _isloading()
+                          : ElevatedButton(onPressed: () async{
                               await unzipEpub(widget.book.bookid); 
                             }, 
                             child: const Text("     Open   "),
@@ -147,6 +152,18 @@ class _DetailScreenState extends State<DetailScreen> {
     else{
       return ElevatedButton(onPressed: () {_download(widget.book.bookid);}, child: const Text("Download"));
     }
+  }
+
+  Widget _isloading(){
+      return AnimateIcon(
+          key: UniqueKey(),
+          onTap: () {},
+          iconType: IconType.continueAnimation,
+          height: 70,
+          width: 70,                                   
+          animateIcon: AnimateIcons.iPhoneSpinner,
+          color: Colors.blue,
+      );    
   }
 
   Widget _appBarBack(){
@@ -286,6 +303,9 @@ class _DetailScreenState extends State<DetailScreen> {
   }
 
   Future<void>unzipEpub(int bookid) async{
+    setState(() {
+      isOpening = true;
+    });
     String dir = (await getApplicationDocumentsDirectory()).path;
 
     String bookUrl = "$dir/$bookid/$bookid.zip";
@@ -361,6 +381,10 @@ class _DetailScreenState extends State<DetailScreen> {
           MaterialPageRoute(builder: (context) => PdfReaderScreen(bookId: bookid, pdfUrl: pdfUrl)),          
         );
       }
+
+      setState(() {
+        isOpening = false;
+      });
     }
     else{
       //print("zip file is not exist");

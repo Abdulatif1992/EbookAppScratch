@@ -313,7 +313,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ),
-          const Center(child: const CircularProgressIndicator()),
+          const Center(child: CircularProgressIndicator()),
         ],  
       )
     );
